@@ -77,21 +77,13 @@ pipeline {
                     def pom = readMavenPom file: 'pom.xml'
                     def image = "jcharalla/${pom.artifactId}"
                     
-                    sh 'docker run --privileged --rm tonistiigi/binfmt --install all'
-                    sh 'docker buildx create --use'
-                    sh 'docker buildx inspect --bootstrap'
+                    sh "docker build -t ${image}:${pom.version} . -t ${image}:latest"
+                    sh 'docker images'
 
-                    sh 'docker buildx version'
-
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                        sh """
-                            docker buildx build \
-                                -t ${image}:${pom.version} \
-                                -t ${image}:latest \
-                                --platform linux/amd64,linux/arm64 --push .
-                        """
-                    }
+                    sh 'echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin'
+                    sh "docker push ${image}:${pom.version}"
+                    sh "docker push ${image}:latest"
+                    sh 'docker logout'
                 }
             }
         }            
