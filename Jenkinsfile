@@ -50,6 +50,7 @@ pipeline {
                 docker {
                     image 'docker:29.4.0-cli'
                     args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
                 }
             }
             environment {
@@ -58,10 +59,6 @@ pipeline {
             }
             steps {
                 script {
-                    sh 'pwd'
-                    sh 'ls -la'
-                    sh 'ls -la target || true'
-
                     def pom = readMavenPom file: 'pom.xml'
                     def image = "jcharalla/${pom.artifactId}"
                     
