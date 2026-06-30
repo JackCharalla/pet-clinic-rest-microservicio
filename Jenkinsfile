@@ -58,6 +58,9 @@ pipeline {
             }
             steps {
                 script {
+                    sh 'pwd'
+                    sh 'ls -la'
+                    sh 'ls -la target || true'
 
                     def pom = readMavenPom file: 'pom.xml'
                     def image = "jcharalla/${pom.artifactId}"
