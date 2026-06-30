@@ -1,5 +1,5 @@
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:21
 WORKDIR /workspace
-COPY target/spring-petclinic-rest-*.jar app.jar
+COPY target/pet-clinic-rest-microservicio-*.jar app.jar
 EXPOSE 9966
 ENTRYPOINT [ "java", "-jar", "/workspace/app.jar" ]

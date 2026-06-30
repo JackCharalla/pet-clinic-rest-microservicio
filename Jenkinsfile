@@ -11,32 +11,18 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvn clean compile -B -ntp'
+                sh 'mvn clean package -DskipTests -B -ntp'
             }
         }
-        stage('Test Junit') {
+        stage('Tests (Junit + Jacoco)') {
             steps {
-                sh 'mvn test -B -ntp'
+                sh 'mvn test jacoco:report -B -ntp'
             }
-            post { 
+            post {
                 success {
                     junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-        stage('Test Jacoco') {
-            steps {
-                sh 'mvn jacoco:report -B -ntp'
-            }
-            post { 
-                success {
                     recordCoverage(tools: [[parser: 'JACOCO']])
                 }
-            }
-        }
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests -B -ntp'
             }
         }
         stage('SonarQube') {
@@ -60,12 +46,7 @@ pipeline {
             }
         }
         stage('DockerHub') {
-            agent {
-                docker {
-                    image 'docker:29.4.0-cli'
-                    args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
+            agent any
             environment {
                 DOCKER_CONFIG = "${WORKSPACE}/.docker"
                 DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
