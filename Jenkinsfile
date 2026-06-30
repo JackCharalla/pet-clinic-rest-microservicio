@@ -75,7 +75,7 @@ pipeline {
                 script {
 
                     def pom = readMavenPom file: 'pom.xml'
-                    def image = "danycenas/${pom.artifactId}"
+                    def image = "jcharalla/${pom.artifactId}"
                     
                     sh 'docker run --privileged --rm tonistiigi/binfmt --install all'
                     sh 'docker buildx create --use'
