@@ -1,8 +1,7 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.15-amazoncorretto-21'
-        }
+    agent any
+    tools {
+        maven 'maven3.9.14'
     }
     environment {
         MAVEN_OPTS = "-Dmaven.repo.local=${WORKSPACE}/.m2"
@@ -12,7 +11,6 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests -B -ntp'
-                stash includes: '**', name: 'workspace'
             }
         }
         stage('Tests (Junit + Jacoco)') {
@@ -47,14 +45,18 @@ pipeline {
             }
         }
         stage('DockerHub') {
-            agent any
+
+            agent {
+                docker {
+                    image 'docker:29.4.0-cli'
+                    args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             environment {
                 DOCKER_CONFIG = "${WORKSPACE}/.docker"
                 DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-            }            
-            options { skipDefaultCheckout() }
+            }
             steps {
-                unstash 'workspace'
                 script {
 
                     def pom = readMavenPom file: 'pom.xml'
