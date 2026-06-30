@@ -12,6 +12,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests -B -ntp'
+                stash includes: '**', name: 'workspace'
             }
         }
         stage('Tests (Junit + Jacoco)') {
@@ -53,6 +54,7 @@ pipeline {
             }            
             options { skipDefaultCheckout() }
             steps {
+                unstash 'workspace'
                 script {
 
                     def pom = readMavenPom file: 'pom.xml'
